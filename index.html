@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0c1622" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Offline Personal Assistant</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-left" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-right" aria-hidden="true"></div>
+
+    <main class="shell">
+      <header class="hero card">
+        <p class="eyebrow">Private · Offline · Local First</p>
+        <h1>Offline Personal Assistant</h1>
+        <p class="hero-copy">
+          Plan your day, track habits, write notes, journal trades, and run quick
+          actions without internet access.
+        </p>
+        <div class="hero-meta">
+          <div>
+            <span class="meta-label">Current Time</span>
+            <strong id="current-time">--:--</strong>
+          </div>
+          <div>
+            <span class="meta-label">Daily Focus</span>
+            <strong id="proactive-tip">Loading...</strong>
+          </div>
+          <div>
+            <span class="meta-label">Storage</span>
+            <strong>Local device only</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="card command-center">
+        <h2>Quick Command</h2>
+        <p class="muted">Examples: <code>add task Review probability notes at 19:00</code>, <code>add habit Workout</code>, <code>note Ideas :: Build a C++ parser</code></p>
+        <div class="command-row">
+          <input id="command-input" type="text" placeholder="Type command..." autocomplete="off" />
+          <button id="run-command">Run</button>
+        </div>
+        <div class="app-actions">
+          <button id="install-app" type="button" hidden>Install App</button>
+          <span id="app-install-status" class="muted">Install from your browser menu if prompted.</span>
+        </div>
+        <p id="command-output" class="command-output">Ready.</p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-head">
+            <h2>Tasks & Reminders</h2>
+            <span class="pill" id="task-count">0 open</span>
+          </div>
+          <form id="task-form" class="stack">
+            <input name="title" type="text" placeholder="Task title" required />
+            <div class="split">
+              <input name="due" type="datetime-local" />
+              <select name="priority">
+                <option value="low">Low priority</option>
+                <option value="medium" selected>Medium priority</option>
+                <option value="high">High priority</option>
+              </select>
+            </div>
+            <button type="submit">Add Task</button>
+          </form>
+          <ul id="task-list" class="list"></ul>
+          <div class="divider"></div>
+          <h3>Time Blocking Suggestion</h3>
+          <ul id="time-blocks" class="list compact"></ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Habits</h2>
+            <span class="pill" id="habit-count">0 active</span>
+          </div>
+          <form id="habit-form" class="split single-row">
+            <input name="habit" type="text" placeholder="Habit name" required />
+            <button type="submit">Add</button>
+          </form>
+          <ul id="habit-list" class="list"></ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Notes & Knowledge</h2>
+          </div>
+          <form id="note-form" class="stack">
+            <input name="title" type="text" placeholder="Note title" required />
+            <textarea name="content" rows="4" placeholder="Write your note..." required></textarea>
+            <input name="tags" type="text" placeholder="Tags (comma separated)" />
+            <button type="submit">Save Note</button>
+          </form>
+          <input id="note-search" type="search" placeholder="Search notes..." />
+          <ul id="note-list" class="list"></ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Trading Journal</h2>
+          </div>
+          <form id="trade-form" class="stack">
+            <div class="split three">
+              <input name="symbol" type="text" placeholder="Symbol" required />
+              <select name="direction">
+                <option value="long">Long</option>
+                <option value="short">Short</option>
+              </select>
+              <input name="size" type="number" step="0.01" min="0" placeholder="Size" required />
+            </div>
+            <div class="split three">
+              <input name="entry" type="number" step="0.0001" placeholder="Entry" required />
+              <input name="exit" type="number" step="0.0001" placeholder="Exit" required />
+              <input name="date" type="date" required />
+            </div>
+            <textarea name="notes" rows="3" placeholder="Setup, liquidity notes, SMC context..."></textarea>
+            <button type="submit">Log Trade</button>
+          </form>
+          <p id="trade-stats" class="muted">No trades logged yet.</p>
+          <ul id="trade-list" class="list compact"></ul>
+
+          <div class="divider"></div>
+          <h3>Manual Price Analysis</h3>
+          <form id="price-form" class="split single-row">
+            <input name="price" type="number" step="0.0001" placeholder="Add price point" required />
+            <button type="submit">Add</button>
+          </form>
+          <p id="price-summary" class="muted">Waiting for data...</p>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>System Status</h2>
+          </div>
+          <ul id="system-status" class="list compact"></ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Preferences Memory</h2>
+          </div>
+          <form id="prefs-form" class="stack">
+            <input name="name" type="text" placeholder="Your name" />
+            <input name="studyTime" type="time" />
+            <input name="tradingSession" type="text" placeholder="Trading session (e.g., London Open)" />
+            <input name="wakeTime" type="time" />
+            <button type="submit">Save Preferences</button>
+          </form>
+          <p id="prefs-summary" class="muted">No preferences saved yet.</p>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Local File Search</h2>
+          </div>
+          <p class="muted">Optional and local-only. Requires browser support for directory access.</p>
+          <div class="split single-row">
+            <button id="pick-directory" type="button">Pick Folder</button>
+            <input id="file-query" type="search" placeholder="Search filename" />
+          </div>
+          <ul id="file-list" class="list compact"></ul>
+        </article>
+      </section>
+    </main>
+
+    <template id="task-item-template">
+      <li>
+        <div class="item-row">
+          <label class="checkbox-wrap">
+            <input type="checkbox" />
+            <span class="item-title"></span>
+          </label>
+          <button class="danger small" type="button">Delete</button>
+        </div>
+        <p class="item-meta"></p>
+      </li>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
